@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  db:
+    image: mariadb:10.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpass
+      - MYSQL_DATABASE=pokenctyl
+      - MYSQL_USER=pokenctyl
+      - MYSQL_PASSWORD=pokenctyl123
+    volumes:
+      - db_data:/var/lib/mysql
+  backend:
+    build: ./panel/backend
+    ports:
+      - 8080:8080
+    environment:
+      - DB_HOST=db
+      - DB_USER=pokenctyl
+      - DB_PASS=pokenctyl123
+      - DB_NAME=pokenctyl
+    depends_on:
+      - db
+  frontend:
+    build: ./panel/frontend
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
+  nginx:
+    image: nginx:stable
+    ports:
+      - 80:80
+    volumes:
+      - ./panel/frontend/build:/usr/share/nginx/html:ro
+    depends_on:
+      - frontend
+volumes:
+  db_data:
